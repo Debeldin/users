@@ -1,0 +1,27 @@
+<?php
+echo "<!DOCTYPE html>\n";
+echo "<html lang=\"en\">";
+echo "<head>";
+echo "<title>Users</title>";
+echo "<meta charset=\"UTF-8\">";
+echo "</head>";
+echo "<body>";
+echo "<h1>Simple users api</h1>";
+echo "<p>This is a simple users api.</p>";
+echo "<h2>Example requests</h2>";
+echo "<pre>";
+echo "/* GET - Search for users */\n";
+echo "curl --request GET 'http://localhost/users/api/userapi.php?search=test'\n\n";
+echo "/* POST - Add a new user (with JSON body) */\n";
+echo "curl --request POST 'http://localhost/users/api/userapi.php' \\\n";
+echo "--header 'Content-Type: application/json' \\\n";
+echo "--data-raw '{\"first_name\":\"John\",\"last_name\":\"Doe\",\"email\":\"john.doe@example.com\",\"birthdate\":\"1990-01-01\"}'\n\n";
+echo "/* PUT - Update a user by id (with JSON body) */\n";
+echo "curl --request PUT 'http://localhost/users/api/userapi.php?id=1' \\\n";
+echo "--header 'Content-Type: application/json' \\\n";
+echo "--data-raw '{\"first_name\":\"Jane\",\"last_name\":\"Doe\",\"email\":\"jane.doe@example.com\",\"birthdate\":\"1992-02-02\"}'\n\n";
+echo "/* DELETE - Delete a user by id */\n";
+echo "curl --request DELETE 'http://localhost/users/api/userapi.php?id=1'\n";
+echo "</pre>";
+echo "</body>";
+echo "</html>";
