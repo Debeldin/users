@@ -35,14 +35,14 @@ class User
     }
 
     /**
-     * Searches for users by first name, last name, or email.
+     * Searches for users by first name, last name, email or birthdate.
      *
      * @param string $search_term The search term.
      * @return array An array of matching users.
      */
     public function searchUser(string $search_term): array
     {
-        $sql = "SELECT * FROM users WHERE first_name LIKE :search OR last_name LIKE :search OR email LIKE :search";
+        $sql = "SELECT * FROM users WHERE first_name LIKE :search OR last_name LIKE :search OR email LIKE :search OR birth_date LIKE :search";
         try {
             $stmt = $this->db->prepare($sql);
             $searchParam = '%' . $search_term . '%';
