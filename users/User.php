@@ -14,18 +14,29 @@ class User
     /**
      * Adds a new user to the database.
      *
-     * @param string $first_name The first name of the user.
-     * @param string $last_name The last name of the user.
+     * @param string $firstname The first name of the user.
+     * @param string $lastname The last name of the user.
      * @param string $email The email address of the user.
      * @param string $birthdate The birthdate of the user in 'YYYY-MM-DD' format.
      */
-    public function addUser(string $first_name, string $last_name, string $email, string $birthdate): void
+    public function addUser(string $firstname, string $lastname, string $email, string $birthdate): void
     {
+        // Validate inputs
+        if (empty($firstname) || empty($lastname) || empty($email) || empty($birthdate)) {
+            throw new \InvalidArgumentException("All fields are required.");
+        }
+        if (!$this->validateEmail($email)) {
+            throw new \InvalidArgumentException("Invalid email format.");
+        }
+        if (!$this->validateDate($birthdate)) {
+            throw new \InvalidArgumentException("Invalid birthdate format. Use YYYY-MM-DD.");
+        }
+
         $sql = "INSERT INTO users (first_name, last_name, email, birth_date) VALUES (:first_name, :last_name, :email, :birth_date)";
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':first_name', $first_name);
-            $stmt->bindParam(':last_name', $last_name);
+            $stmt->bindParam(':first_name', $firstname);
+            $stmt->bindParam(':last_name', $lastname);
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':birth_date', $birthdate);
             $stmt->execute();
@@ -37,16 +48,16 @@ class User
     /**
      * Searches for users by first name, last name, email or birthdate.
      *
-     * @param string $search_term The search term.
+     * @param string $searchterm The search term.
      * @return array An array of matching users.
      */
-    public function searchUser(string $search_term): array
+    public function searchUser(string $searchterm): array
     {
         $sql = "SELECT * FROM users WHERE first_name LIKE :search OR last_name LIKE :search OR email LIKE :search OR birth_date LIKE :search";
         try {
             $stmt = $this->db->prepare($sql);
-            $searchParam = '%' . $search_term . '%';
-            $stmt->bindParam(':search', $searchParam);
+            $searchparam = '%' . $searchterm . '%';
+            $stmt->bindParam(':search', $searchparam);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -61,6 +72,10 @@ class User
      */
     public function deleteUser(int $id): void
     {
+        // Basic ID validation
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("User ID must be a positive integer.");
+        }
         $sql = "DELETE FROM users WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
@@ -75,19 +90,33 @@ class User
      * Updates a user's information.
      *
      * @param int $id The ID of the user to update.
-     * @param string $first_name The new first name.
-     * @param string $last_name The new last name.
+     * @param string $firstname The new first name.
+     * @param string $lastname The new last name.
      * @param string $email The new email.
      * @param string $birthdate The new birthdate.
      */
-    public function updateUser(int $id, string $first_name, string $last_name, string $email, string $birthdate): void
+    public function updateUser(int $id, string $firstname, string $lastname, string $email, string $birthdate): void
     {
+        // Validate inputs
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("User ID must be a positive integer.");
+        }
+        if (empty($firstname) || empty($lastname) || empty($email) || empty($birthdate)) {
+            throw new \InvalidArgumentException("All fields are required.");
+        }
+        if (!$this->validateEmail($email)) {
+            throw new \InvalidArgumentException("Invalid email format.");
+        }
+        if (!$this->validateDate($birthdate)) {
+            throw new \InvalidArgumentException("Invalid birthdate format. Use YYYY-MM-DD.");
+        }
+
         $sql = "UPDATE users SET first_name = :first_name, last_name = :last_name, email = :email, birth_date = :birth_date WHERE id = :id";
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
-            $stmt->bindParam(':first_name', $first_name);
-            $stmt->bindParam(':last_name', $last_name);
+            $stmt->bindParam(':first_name', $firstname);
+            $stmt->bindParam(':last_name', $lastname);
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':birth_date', $birthdate);
             $stmt->execute();
@@ -95,4 +124,29 @@ class User
             throw $e;
         }
     }
+
+    /**
+     * Validates a date string in 'YYYY-MM-DD' format.
+     * @param string $date The date string to validate.
+     * @return bool True if the date is valid, false otherwise.
+     */
+    private function validateDate(string $date): bool
+    {
+        $dateparts = explode('-', $date);
+        if (count($dateparts) !== 3) {
+            return false;
+        }
+        return checkdate($dateparts[1], $dateparts[2], $dateparts[0]);
+    }
+
+    /**
+     * Validates an email address.
+     * @param string $email The email address to validate.
+     * @return bool True if the email is valid, false otherwise.
+     */
+    private function validateEmail(string $email): bool
+    {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
 }
