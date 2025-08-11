@@ -91,10 +91,14 @@ try {
             echo json_encode(["message" => "Invalid request method"]);
             break;
     }
+} catch (\InvalidArgumentException $e) {
+    http_response_code(400); // Bad Request for invalid user input
+    echo json_encode(["error" => $e->getMessage()]);
 } catch (\PDOException $e) {
-    http_response_code(500);
+    http_response_code(500); // Internal Server Error for database issues
     echo json_encode(["error" => "Database error: " . $e->getMessage()]);
 } catch (\Exception $e) {
-    http_response_code(500);
+    http_response_code(500); // Catch any other unexpected errors
     echo json_encode(["error" => "An unexpected error occurred: " . $e->getMessage()]);
 }
+
